@@ -112,7 +112,7 @@
 
     - name: Get the local IP address of ens5
       shell: 
-        cmd: ip --json addr show ens5 | jq -r '.[0].addr_info[] | select(.family == "inet") | .local'
+        cmd: hostname -I | awk '{print $1}'
       args:
         executable: /bin/bash
       register: local_ip
