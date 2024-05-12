@@ -165,8 +165,8 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         script: |  
-          sudo -i
-          echo "KUBECONFIG=$(cat $HOME/.kube/config | base64)" >> $GITHUB_ENV 
+          sudo su
+          echo "KUBECONFIG=$(sudo cat /root/.kube/config | base64)" >> $GITHUB_ENV 
 
     - name: Kubectl Action
       uses: tale/kubectl-action@v1
