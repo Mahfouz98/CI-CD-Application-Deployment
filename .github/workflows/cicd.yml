@@ -126,6 +126,9 @@ jobs:
         echo "workernode1=$(terraform output -raw worker-node1-ip)" >> $GITHUB_ENV
         echo "workernode2=$(terraform output -raw worker-node2-ip)" >> $GITHUB_ENV
 
+    - name: Install jq
+      run: sudo apt-get update && sudo apt-get install -y jq
+      
     - name: Run playbook
       uses: dawidd6/action-ansible-playbook@v2
       with:
