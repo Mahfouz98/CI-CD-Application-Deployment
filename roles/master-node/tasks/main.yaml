@@ -165,6 +165,8 @@
       args:
         executable: /bin/bash
 
+    - name: Transfer join command file from Server A to Server B
+      ansible.builtin.command: scp -o StrictHostKeyChecking=no -i /home/ubuntu/keypair.pem /home/ubuntu/joincommand.sh ubuntu@{{ hostvars['worker']['ansible_host'] }}:/home/ubuntu/.
 
 
 

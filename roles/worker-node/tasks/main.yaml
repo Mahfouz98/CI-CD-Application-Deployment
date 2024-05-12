@@ -124,12 +124,6 @@
         content: |
           KUBELET_EXTRA_ARGS=--node-ip={{ local_ip.stdout }}
       
-    - name: Synchronize join command file to Machine B
-      ansible.builtin.synchronize:
-        src: /home/ubuntu/joincommand.sh
-        dest: /home/ubuntu/joincommand.sh
-        mode: pull
-        delegate_to: machineA
 
     - name: Adjust file to be executable and exec it
       ansible.builtin.shell: |
