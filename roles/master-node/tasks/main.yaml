@@ -142,6 +142,7 @@
           kubeadm init --control-plane-endpoint=$IPADDR --apiserver-cert-extra-sans=$IPADDR --pod-network-cidr=$POD_CIDR --node-name=$NODENAME 
       args:
         executable: /bin/bash
+      ignore_errors: true
       
 
     - name: Create .kube directory
