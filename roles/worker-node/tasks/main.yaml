@@ -133,6 +133,7 @@
         sed -i '1i #!/bin/bash' /home/ubuntu/joincommand.sh &&
         chmod +x /home/ubuntu/joincommand.sh &&
         /home/ubuntu/joincommand.sh
+      ignore_errors: true
 
     
 
