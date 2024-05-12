@@ -114,7 +114,7 @@
       apt:
         name: jq
         state: present
-        
+
     - name: Get the local IP address of ens5
       shell: 
         cmd: ip --json addr show ens5 | jq -r '.[0].addr_info[] | select(.family == "inet") | .local'
@@ -131,14 +131,14 @@
       
 
     - name: Get the external IP of the machine
-      script: |
+      shell: |
         IPADDR=$(curl ifconfig.me && echo "")
         NODENAME=$(hostname -s)
         POD_CIDR="192.168.0.0/16"
 
     - name: Initialize the Kubernetes cluster
       shell: 
-        cmd: sudo kubeadm init --control-plane-endpoint=$IPADDR  --apiserver-cert-extra-sans=$IPADDR  --pod-network-cidr=$POD_CIDR --node-name $NODENAME --ignore-preflight-errors Swap
+        cmd: kubeadm init --control-plane-endpoint=$IPADDR  --apiserver-cert-extra-sans=$IPADDR  --pod-network-cidr=$POD_CIDR --node-name $NODENAME --ignore-preflight-errors Swap
       args:
         executable: /bin/bash
       ignore_errors: true
