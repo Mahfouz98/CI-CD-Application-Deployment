@@ -20,9 +20,3 @@ variable "EC2Volume" {
     default = "30"
     description = "the volume size of ec2 instances"
 }
-
-variable "BUCKETNAME" {
-    default = "statefilebucketdemo"
-    description = "the s3 bucket name which you will save the statefile in"
-  
-}

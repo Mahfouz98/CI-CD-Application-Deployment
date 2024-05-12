@@ -29,7 +29,8 @@ jobs:
         name: Boardgame
         path: target/*.jar
   
-  Test: 
+  Test:
+    needs: [ Build ] 
     name: Make Vulnerability Scan, Unit-Test and Quality Gate check
     runs-on: ubuntu-22.04
     steps:
@@ -95,6 +96,7 @@ jobs:
       run: docker push ahmedmahfouz/webapp:latest
      
   Deploy: 
+    needs: [ Build , Test ]
     name: Provision aws infrastructure using Terraform
     runs-on: ubuntu-22.04
     env:
