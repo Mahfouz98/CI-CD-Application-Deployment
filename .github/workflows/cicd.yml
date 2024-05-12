@@ -122,9 +122,9 @@ jobs:
 
     - name: Take outputs to Github Enviroment Variables
       run: |
-       echo "masternode=$(terraform output -raw master-node-ip) >> $GITHUB_ENV
-       echo "workernode1=$(terraform output -raw worker-node1-ip) >> $GITHUB_ENV
-       echo "workernode2=$(terraform output -raw worker-node2-ip) >> $GITHUB_ENV
+        echo "masternode=$(terraform output -raw master-node-ip)" >> $GITHUB_ENV
+        echo "workernode1=$(terraform output -raw worker-node1-ip)" >> $GITHUB_ENV
+        echo "workernode2=$(terraform output -raw worker-node2-ip)" >> $GITHUB_ENV
 
     - name: Run playbook
       uses: dawidd6/action-ansible-playbook@v2
