@@ -139,11 +139,7 @@
     - name: Initialize the Kubernetes cluster
       shell: 
         cmd: |
-          kubeadm init --control-plane-endpoint=$IPADDR \
-            --apiserver-cert-extra-sans=$IPADDR \
-            --pod-network-cidr=$POD_CIDR \
-            --node-name $NODENAME \
-            --ignore-preflight-errors=Swap
+          kubeadm init --control-plane-endpoint=$IPADDR --apiserver-cert-extra-sans=$IPADDR --pod-network-cidr=$POD_CIDR --node-name $NODENAME --ignore-preflight-errors=swap
       args:
         executable: /bin/bash
       
