@@ -165,13 +165,19 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         script: |  
-          echo "$(sudo cat /root/.kube/config | base64)" >> /home/ubuntu/KUBECONFIG
+          echo "$(sudo cat /root/.kube/config | base64)" > /home/ubuntu/KUBECONFIG
 
+
+    - name: Set up SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ env.masternode }} >> ~/.ssh/known_hosts
 
     - name: Copy file from remote
-      run: |
-        scp -i ${{ secrets.SSH_PRIVATE_KEY }} ubuntu@${{ env.masternode  }}:/home/ubuntu/KUBECONFIG ~
-        
+      run: scp -i ~/.ssh/id_rsa ubuntu@${{ env.masternode }}:/home/ubuntu/KUBECONFIG ~
+
     - name: save Kubeconfig into github variables
       run: |
         echo "KUBECONFIG=$(cat ~/KUBECONFIG)" >> $GITHUB_ENV
