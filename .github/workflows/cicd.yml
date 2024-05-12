@@ -165,8 +165,16 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         script: |  
-          sudo su
-          echo "KUBECONFIG=$(sudo cat /root/.kube/config | base64)" >> $GITHUB_ENV 
+          echo "$(sudo cat /root/.kube/config | base64)" >> /home/ubuntu/KUBECONFIG
+
+
+    - name: Copy file from remote
+      run: |
+        scp -i ${{ secrets.SSH_PRIVATE_KEY }} ubuntu@${{ env.masternode  }}:/home/ubuntu/KUBECONFIG ~
+        
+    - name: save Kubeconfig into github variables
+      run: |
+        echo "KUBECONFIG=$(cat ~/KUBECONFIG)" >> $GITHUB_ENV
 
     - name: Kubectl Action
       uses: tale/kubectl-action@v1
