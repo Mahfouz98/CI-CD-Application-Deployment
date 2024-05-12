@@ -106,27 +106,30 @@
       vars:
         kubernetes_version: "1.29"
 
-    - name: Set node IP for kubelet
+    - name: Get the local IP address of ens5
+      shell: |
+        ip --json addr show ens5 | jq -r '.[0].addr_info[] | select(.family == "inet") | .local'
+      register: local_ip
+      changed_when: false
+
+    - name: Set KUBELET_EXTRA_ARGS in /etc/default/kubelet
       copy:
         dest: /etc/default/kubelet
         content: |
-          KUBELET_EXTRA_ARGS=--node-ip={{ ansible_default_ipv4.address }}
+          KUBELET_EXTRA_ARGS=--node-ip={{ local_ip.stdout }}
+      
 
     - name: Get the external IP of the machine
-      shell: curl ifconfig.me
-      register: ipaddr
-
-    - name: Get the short hostname of the machine
-      command: hostname -s
-      register: nodename
+      script: |
+        IPADDR=$(curl ifconfig.me && echo "")
+        NODENAME=$(hostname -s)
+        POD_CIDR="192.168.0.0/16"
 
     - name: Initialize the Kubernetes cluster
-      shell: |
-        kubeadm init --control-plane-endpoint={{ ipaddr.stdout }} \
-        --apiserver-cert-extra-sans={{ ipaddr.stdout }} \
-        --pod-network-cidr={{ pod_network_cidr }} \
-        --node-name {{ nodename.stdout }} \
-        --ignore-preflight-errors Swap
+      shell: 
+        cmd: sudo kubeadm init --control-plane-endpoint=$IPADDR  --apiserver-cert-extra-sans=$IPADDR  --pod-network-cidr=$POD_CIDR --node-name $NODENAME --ignore-preflight-errors Swap
+      args:
+        executable: /bin/bash
       ignore_errors: true
 
     - name: Create .kube directory
@@ -149,17 +152,6 @@
         cmd: sudo kubeadm token create --print-join-command > /home/ubuntu/joincommand.sh
       args:
         executable: /bin/bash
-
-    - name: copy keypair file into hosts
-      copy:
-        src: /home/loco/Downloads/keypair.pem
-        dest: /home/ubuntu/keypair.pem
-
-    - name: Change Permission of the keypair file into 400
-      ansible.builtin.command: chmod 400 /home/ubuntu/keypair.pem
-
-    - name: Transfer join command file from Server A to Server B
-      ansible.builtin.command: scp -o StrictHostKeyChecking=no -i /home/ubuntu/keypair.pem /home/ubuntu/joincommand.sh ubuntu@{{ hostvars['worker']['ansible_host'] }}:/home/ubuntu/.
 
 
 
