@@ -110,6 +110,9 @@
       vars:
         kubernetes_version: "1.29"
 
+    - name: Install jq package
+      command: sudo apt-get update && sudo apt-get install -y jq
+
     - name: Get the local IP address of ens5
       shell: 
         cmd: ip --json addr show ens5 | jq -r '.[0].addr_info[] | select(.family == "inet") | .local'
