@@ -1,0 +1,122 @@
+---
+    - name: Load overlay and br_netfilter modules
+      modprobe:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - overlay
+        - br_netfilter
+
+    - name: Add sysctl settings for Kubernetes
+      sysctl:
+        name: "{{ item.key }}"
+        value: "{{ item.value }}"
+        state: present
+        reload: yes
+      loop:
+        - { key: 'net.bridge.bridge-nf-call-iptables', value: '1' }
+        - { key: 'net.bridge.bridge-nf-call-ip6tables', value: '1' }
+        - { key: 'net.ipv4.ip_forward', value: '1' }
+
+    - name: Apply all system-wide sysctl settings
+      command: sysctl --system
+
+    - name: Disable swap
+      command: swapoff -a
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg2
+          - software-properties-common
+   
+    - name: Add CRIO version specific repository
+      shell: |
+        export OS=xUbuntu_22.04
+        export CRIO_VERSION=1.24
+        echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/ /"| sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+        echo "deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/$CRIO_VERSION/$OS/ /"|sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable:cri-o:$CRIO_VERSION.list
+        curl -L https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:$CRIO_VERSION/$OS/Release.key | sudo apt-key add -
+        curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/Release.key | sudo apt-key add -
+
+    - name: Update the APT cache
+      apt:
+        update_cache: yes
+
+
+   
+    - name: Install CRIO and runc
+      apt:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - cri-o
+        - cri-o-runc
+
+    - name: Enable and start CRIO service
+      systemd:
+        name: crio
+        enabled: yes
+        state: started
+
+    - name: Download and install crictl
+      get_url:
+        url: "https://github.com/kubernetes-sigs/cri-tools/releases/download/{{ crictl_version }}/crictl-{{ crictl_version }}-linux-amd64.tar.gz"
+        dest: "/tmp/crictl-{{ crictl_version }}-linux-amd64.tar.gz"
+      vars:
+        crictl_version: "v1.28.0"
+
+    - name: Extract crictl to /usr/local/bin
+      unarchive:
+        src: "/tmp/crictl-{{ crictl_version }}-linux-amd64.tar.gz"
+        dest: "/usr/local/bin"
+        remote_src: yes
+      vars:
+        crictl_version: "v1.28.0"
+
+    - name: Add Kubernetes repository
+      shell: |
+        KUBERNETES_VERSION=1.29
+        sudo mkdir -p /etc/apt/keyrings
+        curl -fsSL https://pkgs.k8s.io/core:/stable:/v$KUBERNETES_VERSION/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v$KUBERNETES_VERSION/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+    - name: Update the APT cache
+      apt:
+       update_cache: yes
+
+    - name: Install Kubernetes components
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - kubelet=1.29.0-1.1
+        - kubectl=1.29.0-1.1
+        - kubeadm=1.29.0-1.1
+      vars:
+        kubernetes_version: "1.29"
+
+    - name: Set node IP for kubelet
+      copy:
+        dest: /etc/default/kubelet
+        content: |
+          KUBELET_EXTRA_ARGS=--node-ip={{ ansible_default_ipv4.address }}
+
+    - name: Adjust file to be executable and exec it
+      ansible.builtin.shell: |
+        sed -i '1i #!/bin/bash' /home/ubuntu/joincommand.sh &&
+        chmod +x /home/ubuntu/joincommand.sh &&
+        /home/ubuntu/joincommand.sh
+
+    
+

@@ -1,0 +1,14 @@
+---
+- hosts: master
+  gather_facts: false
+  become: yes
+  vars:
+    pod_network_cidr: "192.168.0.0/16"
+  roles:
+    - master-node
+    
+- hosts: worker1:worker2
+  gather_facts: false
+  become: yes
+  roles: 
+    - worker-node
