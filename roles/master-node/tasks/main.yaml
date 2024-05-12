@@ -111,8 +111,10 @@
         kubernetes_version: "1.29"
 
     - name: Get the local IP address of ens5
-      shell: |
-        ip --json addr show ens5 | jq -r '.[0].addr_info[] | select(.family == "inet") | .local'
+      shell: 
+        cmd: ip --json addr show ens5 | jq -r '.[0].addr_info[] | select(.family == "inet") | .local'
+      args:
+        executable: /bin/bash
       register: local_ip
       changed_when: false
 
