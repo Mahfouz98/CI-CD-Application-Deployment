@@ -166,9 +166,11 @@
       args:
         executable: /bin/bash
 
-    - name: Transfer join command file from Server A to Server B
-      ansible.builtin.command: scp -o StrictHostKeyChecking=no -i /home/ubuntu/keypair.pem /home/ubuntu/joincommand.sh ubuntu@{{ hostvars['worker2']['ansible_host'] }}:/home/ubuntu/.
+    - name: Transfer join command file from MasterNode to Worker1
+      ansible.builtin.command: scp -o StrictHostKeyChecking=no -i /home/ubuntu/keypair.pem /home/ubuntu/joincommand.sh ubuntu@{{ hostvars['worker1']['ansible_host'] }}:/home/ubuntu/.
 
+    - name: Transfer join command file from MasterNode to Worker2
+      ansible.builtin.command: scp -o StrictHostKeyChecking=no -i /home/ubuntu/keypair.pem /home/ubuntu/joincommand.sh ubuntu@{{ hostvars['worker2']['ansible_host'] }}:/home/ubuntu/.
 
 
 
