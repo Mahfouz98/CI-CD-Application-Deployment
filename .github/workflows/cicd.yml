@@ -170,14 +170,14 @@ jobs:
     - name: Create deployment and service
       uses: appleboy/ssh-action@v1.0.3
       with:
-        host: ${{ env.masternode  }}
+        host: ${{ env.masternode }}
         username: ubuntu
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
-        script: |  
-          sudo -i
-          kubectl apply -f /home/ubuntu/deployment-service.yaml -n webapps
-          kubectl get svc -n webapps
+        request_pty: true
+        script: |
+          sudo kubectl apply -f /home/ubuntu/deployment-service.yaml -n webapps
+          sudo kubectl get svc -n webapps
 
   
     
