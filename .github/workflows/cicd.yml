@@ -152,7 +152,7 @@ jobs:
         inventory: |
           [EC2]
           master ansible_host=${{ env.masternode }}
-          worker ansible_host=${{ env.workernode1 }}
+          worker1 ansible_host=${{ env.workernode1 }}
           worker2 ansible_host=${{ env.workernode2 }}
           [EC2:vars]
           ansible_user="ubuntu" 
@@ -175,6 +175,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         script: |  
+          sudo -i
           kubectl apply -f /home/ubuntu/deployment-service.yaml -n webapps
           kubectl get svc -n webapps
 
