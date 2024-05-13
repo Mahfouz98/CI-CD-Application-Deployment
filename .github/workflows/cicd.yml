@@ -176,6 +176,7 @@ jobs:
         port: 22
         request_pty: true
         script: |
+          sudo kubectl create namespace webapps
           sudo kubectl apply -f /home/ubuntu/deployment-service.yaml -n webapps
           sudo kubectl get svc -n webapps
 
