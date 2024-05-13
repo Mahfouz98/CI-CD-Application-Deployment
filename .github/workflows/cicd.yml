@@ -157,17 +157,6 @@ jobs:
           [EC2:vars]
           ansible_user="ubuntu" 
     
-    - name: multiple command
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ env.masternode  }}
-        username: ubuntu
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: 22
-        script: |  
-          echo "$(sudo cat /root/.kube/config | base64)" > /home/ubuntu/KUBECONFIG
-
-
     - name: Set up SSH key
       run: |
         mkdir -p ~/.ssh
@@ -175,24 +164,21 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H ${{ env.masternode }} >> ~/.ssh/known_hosts
 
-    - name: Copy file from remote
-      run: scp -i ~/.ssh/id_rsa ubuntu@${{ env.masternode }}:/home/ubuntu/KUBECONFIG ~
+    - name: Copy deployment and service file to machine
+      run: scp -i ~/.ssh/id_rsa deployment-service.yaml ubuntu@${{ env.masternode }}:/home/ubuntu/.
 
-    - name: save Kubeconfig into github variables
-      run: |
-        echo "KUBECONFIG<<EOF" >> $GITHUB_ENV
-        cat ~/KUBECONFIG >> $GITHUB_ENV
-        echo "EOF" >> $GITHUB_ENV
-    
-    - name: Kubectl Action
-      uses: tale/kubectl-action@v1
+    - name: Create deployment and service
+      uses: appleboy/ssh-action@v1.0.3
       with:
-        base64-kube-config: ${{ env.KUBECONFIG }}
-    
-    - name: Create Deployment & Service for the Application
-      run: |
-        kubectl apply -f deployment-service.yaml -n webapps
-        kubectl get svc -n webapps
+        host: ${{ env.masternode  }}
+        username: ubuntu
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |  
+          kubectl apply -f /home/ubuntu/deployment-service.yaml -n webapps
+          kubectl get svc -n webapps
+
+  
     
 
 
