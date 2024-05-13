@@ -180,8 +180,10 @@ jobs:
 
     - name: save Kubeconfig into github variables
       run: |
-        echo "KUBECONFIG=$(cat ~/KUBECONFIG)" >> $GITHUB_ENV
-
+        echo "KUBECONFIG<<EOF" >> $GITHUB_ENV
+        cat ~/KUBECONFIG >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+    
     - name: Kubectl Action
       uses: tale/kubectl-action@v1
       with:
